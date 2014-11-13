@@ -1,0 +1,31 @@
+{
+  "name": "Default.js",
+  "description": "A tool for scaffolding a proect with default files",
+  "version": "0.0.1",
+  "homepage": "https://github.com/danieldunderfelt/default.js",
+  "author": {
+    "name": "Daniel Dunderfelt",
+    "email": "jack@jackfranklin.net"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/danieldunderfelt/default.js"
+  },
+  "bugs": {
+    "url": "https://github.com/danieldunderfelt/default.js/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://opensource.org/licenses/MIT"
+    }
+  ],
+  "main": "build/default.js",
+  "engines": {
+    "node": "0.10"
+  },
+  "devDependencies": {
+    "gulp": "~0.3.12"
+  },
+  "keywords": []
+}
