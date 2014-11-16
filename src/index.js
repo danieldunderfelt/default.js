@@ -40,23 +40,18 @@ program
 	.command('create [name]')
 	.description('Create a new skeleton.')
 	.option('-e, --extend [skeleton]', "Base the new skeleton on an existing one.")
-	.action(packageManager.create.bind(packageManager));
+	.action(packageManager.create);
 
 program
-	.command('add [file] [to skeleton]')
+	.command('add [file] [toSkeleton]')
 	.description('Add a file to a skeleton.')
-	.action(packageManager.addFile.bind(packageManager));
+	.action(packageManager.addFile);
 
 program
-	.command('duplicate [skeleton] [new-skeleton]')
-	.description('Duplicate an existing skeleton. It will be placed in your closet as a new skeleton.')
-	.action(packageManager.dupe.bind(packageManager));
-
-program
-	.command('deploy [skeleton...]')
+	.command('deploy [projectName] [skeleton...]')
 	.description('Deploy skeletons into the current working directory.')
 	.option('-t, --tinker [filename]', "Control freak mode. For each file, decide it's path manually.")
-	.action(packageManager.deploy.bind(packageManager));
+	.action(packageManager.deploy);
 
 program.parse(process.argv);
 
