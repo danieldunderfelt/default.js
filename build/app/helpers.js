@@ -1,7 +1,5 @@
 "use strict";
 
-var fs = require("fs");
-
 module.exports = {
   err: function (err) {
     console.log(err);

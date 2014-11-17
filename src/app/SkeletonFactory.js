@@ -9,7 +9,7 @@ class SkeletonFactory {
 
 	constructor(name, callback) {
 		this.currentSkeleton = new Skeleton(name);
-		this.ignorePath = path.resolve(process.cwd(), 'data/.skeleton-ignore');
+		this.ignorePath = path.resolve(helpers.userHome(), '.closet');
 		this.ignore = ignore().addIgnoreFile(this.ignorePath);
 		this.callback = callback;
 	}
@@ -18,7 +18,7 @@ class SkeletonFactory {
 		var self = this;
 		var root = this.createSkeletonDir();
 		this.setSkeletonData(root);
-		this.setSkeletonFiles();
+		this.getSkeletonFiles();
 	}
 
 	isSkeleton() {
@@ -43,34 +43,46 @@ class SkeletonFactory {
 		this.currentSkeleton.root = root;
 	}
 
-	setSkeletonFiles() {
-		var self = this;
+	getSkeletonFiles() {
 
-		recursive(process.cwd(), function(err, files) {
-			if(err) {
-				return helpers.err(err);
-			}
 
-			self.currentSkeleton.files = self.ignore.filter(files);
-			self.putIntoCloset();
+		recursive(process.cwd(), this.setSkeletonFiles.bind(this));
+	}
+
+	setSkeletonFiles(err, files) {
+		if(err) {
+			helpers.err(err);
+		}
+
+		var origRoot = this.currentSkeleton.originalRoot + '/';
+
+		var ignoreProcessed = this.ignore.filter(files);
+		var pathProcessed = ignoreProcessed.map(function(path, i, arr) {
+			return path.replace(origRoot, '');
 		});
+		this.currentSkeleton.files = pathProcessed;
+
+		this.putIntoCloset();
 	}
 
 	putIntoCloset() {
+		var self = this;
+
 		if(this.currentSkeleton.root === process.cwd()) {
 			this.makeSkeletonFile();
 		}
+
 		else {
-			var self = this;
 			var count = this.currentSkeleton.files.length - 1;
 
 			this.currentSkeleton.files.forEach(function(file, i) {
+				console.log(file);
 				var from = self.currentSkeleton.originalRoot + '/' + file;
 				var to = self.currentSkeleton.root + '/' + file;
 
 				fs.copy(from, to, function(err) {
 					if(err) {
-						return helpers.err("File copy error. Make sure files are readable.");
+						helpers.err(err);
 					}
 
 					if(i === count) self.makeSkeletonFile();

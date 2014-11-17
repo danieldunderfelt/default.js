@@ -23,8 +23,12 @@ var PackageManager = (function () {
 
         console.log("Creating a new skeleton...");
 
-        var skeleton = new SkeletonFactory(name, jelpers.done).create();
+        var skeleton = new SkeletonFactory(name, helpers.done).create();
       }
+    },
+    scanCloset: {
+      writable: true,
+      value: function () {}
     },
     addFile: {
       writable: true,

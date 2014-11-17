@@ -15,7 +15,7 @@ var helpers = require("./helpers");
 var SkeletonFactory = (function () {
   var SkeletonFactory = function SkeletonFactory(name, callback) {
     this.currentSkeleton = new Skeleton(name);
-    this.ignorePath = path.resolve(process.cwd(), "data/.skeleton-ignore");
+    this.ignorePath = path.resolve(helpers.userHome(), ".closet");
     this.ignore = ignore().addIgnoreFile(this.ignorePath);
     this.callback = callback;
   };
@@ -27,7 +27,7 @@ var SkeletonFactory = (function () {
         var self = this;
         var root = this.createSkeletonDir();
         this.setSkeletonData(root);
-        this.setSkeletonFiles();
+        this.getSkeletonFiles();
       }
     },
     isSkeleton: {
@@ -58,37 +58,48 @@ var SkeletonFactory = (function () {
         this.currentSkeleton.root = root;
       }
     },
-    setSkeletonFiles: {
+    getSkeletonFiles: {
       writable: true,
       value: function () {
-        var self = this;
+        recursive(process.cwd(), this.setSkeletonFiles.bind(this));
+      }
+    },
+    setSkeletonFiles: {
+      writable: true,
+      value: function (err, files) {
+        if (err) {
+          helpers.err(err);
+        }
 
-        recursive(process.cwd(), function (err, files) {
-          if (err) {
-            return helpers.err(err);
-          }
+        var origRoot = this.currentSkeleton.originalRoot + "/";
 
-          self.currentSkeleton.files = self.ignore.filter(files);
-          self.putIntoCloset();
+        var ignoreProcessed = this.ignore.filter(files);
+        var pathProcessed = ignoreProcessed.map(function (path, i, arr) {
+          return path.replace(origRoot, "");
         });
+        this.currentSkeleton.files = pathProcessed;
+
+        this.putIntoCloset();
       }
     },
     putIntoCloset: {
       writable: true,
       value: function () {
+        var self = this;
+
         if (this.currentSkeleton.root === process.cwd()) {
           this.makeSkeletonFile();
         } else {
-          var self = this;
           var count = this.currentSkeleton.files.length - 1;
 
           this.currentSkeleton.files.forEach(function (file, i) {
+            console.log(file);
             var from = self.currentSkeleton.originalRoot + "/" + file;
             var to = self.currentSkeleton.root + "/" + file;
 
             fs.copy(from, to, function (err) {
               if (err) {
-                return helpers.err("File copy error. Make sure files are readable.");
+                helpers.err(err);
               }
 
               if (i === count) self.makeSkeletonFile();

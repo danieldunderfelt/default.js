@@ -10,21 +10,24 @@ var pkg = require('../package.json');
 var program = require('commander');
 var chalk = require('chalk');
 var path = require('path');
-var fs = require('fs');
+var fs = require('fs-extra');
 var helpers = require('./app/helpers');
 var packageManager = require('./app/PackageManager');
 
 /**
  *
- * Create the .closet folder if it doesn't exist
+ * Create the .closet folder and the ignore file if they don't exist
  *
  */
 
 var closetPath = path.resolve(helpers.userHome(), '.closet');
 
 if( ! fs.existsSync(closetPath) ) {
-	fs.mkdirSync(closetPath);
+	var data = fs.readFileSync(path.resolve(__dirname, '../data/.skeleton-ignore'));
+	fs.outputFileSync(closetPath + '/.skeleton-ignore', data);
+	console.log(chalk.cyan("=== Closet and ignore file created! ==="));
 }
+
 
 /**
  *
@@ -48,6 +51,11 @@ program
 	.action(packageManager.addFile);
 
 program
+	.command('scan')
+	.description('Scans the closet for uninitiated skeletons.')
+	.action(packageManager.scanCloset);
+
+program
 	.command('deploy [projectName] [skeleton...]')
 	.description('Deploy skeletons into the current working directory.')
 	.option('-t, --tinker [filename]', "Control freak mode. For each file, decide it's path manually.")
@@ -57,7 +65,7 @@ program.parse(process.argv);
 
 /**
  *
- * Fallbacks
+ * Fallback to help display
  *
  */
 

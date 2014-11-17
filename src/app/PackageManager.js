@@ -8,11 +8,15 @@ class PackageManager {
 		if(typeof name === "undefined") {
 			var folderName = process.cwd().split('/');
 			name = folderName[folderName.length - 1];
-		}
+		 }
 
 		console.log("Creating a new skeleton...");
 
-		var skeleton = new SkeletonFactory(name, jelpers.done).create();
+		var skeleton = new SkeletonFactory(name, helpers.done).create();
+	}
+
+	scanCloset() {
+
 	}
 
 	addFile() {

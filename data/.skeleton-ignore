@@ -1,5 +1,11 @@
+# Default Skeleton ignore file.
+
 node_modules
+bower_components
 .git
+.gitattributes
 .idea
 vendor
 *.log
+.sass-cache
+.DS_Store
