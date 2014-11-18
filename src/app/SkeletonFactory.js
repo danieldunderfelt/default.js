@@ -3,63 +3,43 @@ var ignore = require('ignore');
 var recursive = require('recursive-readdir');
 var path = require('path');
 var fs = require('fs-extra');
+var closet = require('./Closet');
 var helpers = require('./helpers');
+var message = require('./messages');
 
 class SkeletonFactory {
 
-	constructor(name, callback) {
-		this.currentSkeleton = new Skeleton(name);
+	constructor(callback) {
 		this.ignorePath = path.resolve(helpers.userHome(), '.closet');
 		this.ignore = ignore().addIgnoreFile(this.ignorePath);
 		this.callback = callback;
 	}
 
-	create() {
+	create(name, extend) {
+		var skeleton = new Skeleton(name);
+		var root = closet.makeSkeletonDir(name);
+		skeleton.originalRoot = process.cwd();
+		skeleton.root = root;
+		this.getSkeletonFiles(skeleton);
+	}
+
+	getSkeletonFiles(skeleton) {
 		var self = this;
-		var root = this.createSkeletonDir();
-		this.setSkeletonData(root);
-		this.getSkeletonFiles();
-	}
+		recursive(process.cwd(), function(err, files) {
+			if(err) {
+				helpers.err(err);
+			}
 
-	isSkeleton() {
-		return fs.existsSync(process.cwd() + '/Skeletonfile');
-	}
-
-	createSkeletonDir() {
-		var skeletonFolder = path.resolve(helpers.userHome(), '.closet/' + this.currentSkeleton.name);
-
-		if(fs.existsSync(skeletonFolder) && this.isSkeleton()) {
-			console.log("A skeleton with that name already exists!");
-			process.exit(1);
-		}
-
-		fs.ensureDirSync(skeletonFolder);
-
-		return skeletonFolder;
-	}
-
-	setSkeletonData(root) {
-		this.currentSkeleton.originalRoot = process.cwd();
-		this.currentSkeleton.root = root;
-	}
-
-	getSkeletonFiles() {
-
-
-		recursive(process.cwd(), this.setSkeletonFiles.bind(this));
-	}
-
-	setSkeletonFiles(err, files) {
-		if(err) {
-			helpers.err(err);
-		}
-
-		var origRoot = this.currentSkeleton.originalRoot + '/';
-
-		var ignoreProcessed = this.ignore.filter(files);
-		var pathProcessed = ignoreProcessed.map(function(path, i, arr) {
-			return path.replace(origRoot, '');
+			self.setSkeletonFiles(skeleton, files);
 		});
+	}
+
+	setSkeletonFiles(skeleton, files) {
+		var ignoreProcessed = this.ignore.filter(files);
+		var pathProcessed = ignoreProcessed.map(function(path) {
+			return helpers.removeOrigPath(path, skeleton.originalRoot + '/');
+		});
+
 		this.currentSkeleton.files = pathProcessed;
 
 		this.putIntoCloset();
@@ -76,7 +56,9 @@ class SkeletonFactory {
 			var count = this.currentSkeleton.files.length - 1;
 
 			this.currentSkeleton.files.forEach(function(file, i) {
-				console.log(file);
+
+				message.fileTransfer(file);
+
 				var from = self.currentSkeleton.originalRoot + '/' + file;
 				var to = self.currentSkeleton.root + '/' + file;
 
@@ -93,8 +75,7 @@ class SkeletonFactory {
 
 	makeSkeletonFile() {
 		var self = this;
-		console.log("Making Skeletonfile...");
-
+		message.makeSkelFile();
 		fs.writeJson(this.currentSkeleton.root + '/Skeletonfile', this.currentSkeleton, function(err) {
 			self.callback();
 		});

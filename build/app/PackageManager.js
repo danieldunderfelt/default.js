@@ -5,9 +5,12 @@ var _classProps = function (child, staticProps, instanceProps) {
   if (instanceProps) Object.defineProperties(child.prototype, instanceProps);
 };
 
+var fs = require("fs-extra");
 var path = require("path");
 var SkeletonFactory = require("./SkeletonFactory");
 var helpers = require("./helpers");
+var message = require("./messages");
+var program = require("commander");
 
 var PackageManager = (function () {
   var PackageManager = function PackageManager() {};
@@ -21,14 +24,16 @@ var PackageManager = (function () {
           name = folderName[folderName.length - 1];
         }
 
-        console.log("Creating a new skeleton...");
+        if (helpers.isSkeleton(name)) {
+          message.skeletonExists();
+        }
 
-        var skeleton = new SkeletonFactory(name, helpers.done).create();
+        var extend = typeof options.extend === "undefined" ? false : options.extend;
+
+        message.creating();
+
+        new SkeletonFactory(message.done).create(name, extend);
       }
-    },
-    scanCloset: {
-      writable: true,
-      value: function () {}
     },
     addFile: {
       writable: true,

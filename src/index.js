@@ -25,7 +25,6 @@ var closetPath = path.resolve(helpers.userHome(), '.closet');
 if( ! fs.existsSync(closetPath) ) {
 	var data = fs.readFileSync(path.resolve(__dirname, '../data/.skeleton-ignore'));
 	fs.outputFileSync(closetPath + '/.skeleton-ignore', data);
-	console.log(chalk.cyan("=== Closet and ignore file created! ==="));
 }
 
 
@@ -43,7 +42,7 @@ program
 	.command('create [name]')
 	.description('Create a new skeleton.')
 	.option('-e, --extend [skeleton]', "Base the new skeleton on an existing one.")
-	.action(packageManager.create);
+	.action(packageManager.create.bind(packageManager));
 
 program
 	.command('add [file] [toSkeleton]')
@@ -51,14 +50,9 @@ program
 	.action(packageManager.addFile);
 
 program
-	.command('scan')
-	.description('Scans the closet for uninitiated skeletons.')
-	.action(packageManager.scanCloset);
-
-program
 	.command('deploy [projectName] [skeleton...]')
 	.description('Deploy skeletons into the current working directory.')
-	.option('-t, --tinker [filename]', "Control freak mode. For each file, decide it's path manually.")
+	.option('-t, --tinker [filename]', "Control freak mode. For each file, decide it's new path manually.")
 	.action(packageManager.deploy);
 
 program.parse(process.argv);

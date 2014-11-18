@@ -1,17 +1,23 @@
 "use strict";
 
+var fs = require("fs-extra");
+var path = require("path");
+var message = require("./messages");
+
 module.exports = {
   err: function (err) {
-    console.log(err);
-    process.exit(1);
+    message.error(err);
   },
 
   userHome: function () {
     return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
   },
 
-  done: function () {
-    console.log("All done!");
-    process.exit();
+  isSkeleton: function (dirName) {
+    return fs.existsSync(path.resolve(this.userHome(), ".closet/" + dirName) + "/Skeletonfile");
+  },
+
+  removeOrigPath: function (str, substr) {
+    return str.replace(substr, "");
   }
 };
