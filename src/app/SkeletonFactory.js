@@ -16,67 +16,52 @@ class SkeletonFactory {
 	}
 
 	create(name, extend) {
-		var skeleton = new Skeleton(name);
+		var skeleton = this.createInstance(name);
 		var root = closet.makeSkeletonDir(name);
 		skeleton.originalRoot = process.cwd();
 		skeleton.root = root;
 		this.getSkeletonFiles(skeleton);
 	}
 
+	createInstance(name) {
+		return new Skeleton(name);
+	}
+
 	getSkeletonFiles(skeleton) {
 		var self = this;
 		recursive(process.cwd(), function(err, files) {
-			if(err) {
-				helpers.err(err);
-			}
-
-			self.setSkeletonFiles(skeleton, files);
+			helpers.err(err);
+			self.processFiles(skeleton, files);
 		});
 	}
 
-	setSkeletonFiles(skeleton, files) {
+	processFiles(skeleton, files) {
 		var ignoreProcessed = this.ignore.filter(files);
 		var pathProcessed = ignoreProcessed.map(function(path) {
 			return helpers.removeOrigPath(path, skeleton.originalRoot + '/');
 		});
 
-		this.currentSkeleton.files = pathProcessed;
-
-		this.putIntoCloset();
+		this.setSkeletonFiles(skeleton, pathProcessed);
 	}
 
-	putIntoCloset() {
-		var self = this;
+	setSkeletonFiles(skeleton, files) {
+		skeleton.files = files;
 
-		if(this.currentSkeleton.root === process.cwd()) {
-			this.makeSkeletonFile();
+		if(skeleton.root === process.cwd()) {
+			this.makeSkeletonFile(skeleton);
 		}
-
 		else {
-			var count = this.currentSkeleton.files.length - 1;
-
-			this.currentSkeleton.files.forEach(function(file, i) {
-
-				message.fileTransfer(file);
-
-				var from = self.currentSkeleton.originalRoot + '/' + file;
-				var to = self.currentSkeleton.root + '/' + file;
-
-				fs.copy(from, to, function(err) {
-					if(err) {
-						helpers.err(err);
-					}
-
-					if(i === count) self.makeSkeletonFile();
-				});
-			});
+			closet.put(skeleton, this.makeSkeletonFile.bind(this));
 		}
 	}
 
-	makeSkeletonFile() {
+	makeSkeletonFile(skeleton) {
 		var self = this;
+
 		message.makeSkelFile();
-		fs.writeJson(this.currentSkeleton.root + '/Skeletonfile', this.currentSkeleton, function(err) {
+
+		fs.writeJson(skeleton.root + '/Skeletonfile', skeleton, function(err) {
+			helpers.err(err);
 			self.callback();
 		});
 	}

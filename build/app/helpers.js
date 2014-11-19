@@ -6,7 +6,9 @@ var message = require("./messages");
 
 module.exports = {
   err: function (err) {
-    message.error(err);
+    if (err) {
+      message.error(err);
+    }
   },
 
   userHome: function () {

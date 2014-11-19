@@ -8,7 +8,7 @@ module.exports = {
 	},
 
 	creating: function() {
-		print(chalk.cyan("Creating your new skeleton..."), "❤");
+		print(chalk.cyan("Creating your new skeleton..."), "☠");
 	},
 
 	done: function() {

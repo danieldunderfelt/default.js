@@ -25,11 +25,17 @@ var SkeletonFactory = (function () {
     create: {
       writable: true,
       value: function (name, extend) {
-        var skeleton = new Skeleton(name);
+        var skeleton = this.createInstance(name);
         var root = closet.makeSkeletonDir(name);
         skeleton.originalRoot = process.cwd();
         skeleton.root = root;
         this.getSkeletonFiles(skeleton);
+      }
+    },
+    createInstance: {
+      writable: true,
+      value: function (name) {
+        return new Skeleton(name);
       }
     },
     getSkeletonFiles: {
@@ -37,15 +43,12 @@ var SkeletonFactory = (function () {
       value: function (skeleton) {
         var self = this;
         recursive(process.cwd(), function (err, files) {
-          if (err) {
-            helpers.err(err);
-          }
-
-          self.setSkeletonFiles(skeleton, files);
+          helpers.err(err);
+          self.processFiles(skeleton, files);
         });
       }
     },
-    setSkeletonFiles: {
+    processFiles: {
       writable: true,
       value: function (skeleton, files) {
         var ignoreProcessed = this.ignore.filter(files);
@@ -53,44 +56,30 @@ var SkeletonFactory = (function () {
           return helpers.removeOrigPath(path, skeleton.originalRoot + "/");
         });
 
-        this.currentSkeleton.files = pathProcessed;
-
-        this.putIntoCloset();
+        this.setSkeletonFiles(skeleton, pathProcessed);
       }
     },
-    putIntoCloset: {
+    setSkeletonFiles: {
       writable: true,
-      value: function () {
-        var self = this;
+      value: function (skeleton, files) {
+        skeleton.files = files;
 
-        if (this.currentSkeleton.root === process.cwd()) {
-          this.makeSkeletonFile();
+        if (skeleton.root === process.cwd()) {
+          this.makeSkeletonFile(skeleton);
         } else {
-          var count = this.currentSkeleton.files.length - 1;
-
-          this.currentSkeleton.files.forEach(function (file, i) {
-            message.fileTransfer(file);
-
-            var from = self.currentSkeleton.originalRoot + "/" + file;
-            var to = self.currentSkeleton.root + "/" + file;
-
-            fs.copy(from, to, function (err) {
-              if (err) {
-                helpers.err(err);
-              }
-
-              if (i === count) self.makeSkeletonFile();
-            });
-          });
+          closet.put(skeleton, this.makeSkeletonFile.bind(this));
         }
       }
     },
     makeSkeletonFile: {
       writable: true,
-      value: function () {
+      value: function (skeleton) {
         var self = this;
+
         message.makeSkelFile();
-        fs.writeJson(this.currentSkeleton.root + "/Skeletonfile", this.currentSkeleton, function (err) {
+
+        fs.writeJson(skeleton.root + "/Skeletonfile", skeleton, function (err) {
+          helpers.err(err);
           self.callback();
         });
       }

@@ -9,7 +9,7 @@ module.exports = {
   },
 
   creating: function () {
-    print(chalk.cyan("Creating your new skeleton..."), "\u2764");
+    print(chalk.cyan("Creating your new skeleton..."), "\u2620");
   },
 
   done: function () {

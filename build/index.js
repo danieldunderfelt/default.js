@@ -14,6 +14,7 @@ var path = require("path");
 var fs = require("fs-extra");
 var helpers = require("./app/helpers");
 var packageManager = require("./app/PackageManager");
+var closet = require("./app/Closet");
 
 /**
  *
@@ -21,13 +22,7 @@ var packageManager = require("./app/PackageManager");
  *
  */
 
-var closetPath = path.resolve(helpers.userHome(), ".closet");
-
-if (!fs.existsSync(closetPath)) {
-  var data = fs.readFileSync(path.resolve(__dirname, "../data/.skeleton-ignore"));
-  fs.outputFileSync(closetPath + "/.skeleton-ignore", data);
-}
-
+closet.make();
 
 /**
  *
