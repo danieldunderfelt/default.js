@@ -20,6 +20,7 @@ class SkeletonFactory {
 		var root = closet.makeSkeletonDir(name);
 		skeleton.originalRoot = process.cwd();
 		skeleton.root = root;
+		skeleton.extend = extend || false;
 		this.getSkeletonFiles(skeleton);
 	}
 

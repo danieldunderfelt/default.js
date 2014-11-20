@@ -3,17 +3,15 @@ var fs = require('fs-extra');
 var helpers = require('./helpers');
 var message = require('./messages');
 
-class Closet {
+module.exports = {
 
-	constructor() {
-		this.path = path.resolve(helpers.userHome(), '.closet');
-	}
+	path: path.resolve(helpers.userHome(), '.closet'),
 
-	get(skeleton) {
+	get: function(skeleton) {
 
-	}
+	},
 
-	put(skeleton, callback) {
+	put: function(skeleton, callback) {
 		var self = this;
 		var count = skeleton.files.length - 1;
 
@@ -29,25 +27,23 @@ class Closet {
 				if(i === count) callback(skeleton);
 			});
 		});
-	}
+	},
 
-	make() {
+	make: function() {
 		if( ! fs.existsSync(this.path) ) {
 			var data = this.getIgnoreData();
 			fs.outputFileSync(this.path + '/.skeleton-ignore', data);
 		}
-	}
+	},
 
-	makeSkeletonDir(name) {
+	makeSkeletonDir: function(name) {
 		var skeletonDir = path.resolve(helpers.userHome(), '.closet/' + name);
 		fs.ensureDirSync(skeletonDir);
 		return skeletonDir;
-	}
+	},
 
-	getIgnoreData() {
+	getIgnoreData: function() {
 		return fs.readFileSync(path.resolve(__dirname, '../data/.skeleton-ignore'));
 	}
 
-}
-
-module.exports = new Closet();
+};

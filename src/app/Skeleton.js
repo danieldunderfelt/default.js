@@ -1,5 +1,6 @@
-function Skeleton(name = "New skeleton") {
+function Skeleton(name) {
 	this.name = name;
+	this.extend = "";
 	this.files = [];
 	this.usedIn = [];
 	this.root = "";
