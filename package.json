@@ -35,10 +35,12 @@
     "skeleton": "build/index.js"
   },
   "dependencies": {
+    "bluebird": "^2.3.11",
     "chalk": "^0.5.1",
     "commander": "^2.5.0",
     "fs-extra": "^0.12.0",
     "ignore": "^2.2.15",
+    "lodash": "^2.4.1",
     "minimatch": "^1.0.0",
     "nconf": "^0.6.9",
     "prompt": "^0.2.14"

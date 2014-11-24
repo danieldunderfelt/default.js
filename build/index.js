@@ -22,7 +22,7 @@ var closet = require("./app/Closet");
  *
  */
 
-closet.make();
+var thePromisedLandExists = closet.make();
 
 /**
  *
@@ -30,22 +30,24 @@ closet.make();
  *
  */
 
-program.version(pkg.version).usage("<commands> [options]").option("--dry", "Do a dry-run.");
+thePromisedLandExists.then(function () {
+  program.version(pkg.version).usage("<commands> [options]").option("--dry", "Do a dry-run.");
 
-program.command("create [name]").description("Create a new skeleton.").option("-e, --extend [skeleton]", "Base the new skeleton on an existing one.").action(packageManager.create.bind(packageManager));
+  program.command("create [name]").description("Create a new skeleton.").option("-e, --extend [skeleton]", "Base the new skeleton on an existing one.").action(packageManager.create.bind(packageManager));
 
-program.command("add [file] [toSkeleton]").description("Add a file to a skeleton.").action(packageManager.addFile);
+  program.command("add [file] [toSkeleton]").description("Add a file to a skeleton.").action(packageManager.addFile);
 
-program.command("deploy [projectName] [skeleton...]").description("Deploy skeletons into the current working directory.").option("-t, --tinker [filename]", "Control freak mode. For each file, decide it's new path manually.").action(packageManager.deploy);
+  program.command("deploy [projectName] [skeleton...]").description("Deploy skeletons into the current working directory.").option("-t, --tinker [filename]", "Control freak mode. For each file, decide it's new path manually.").action(packageManager.deploy);
 
-program.parse(process.argv);
+  program.parse(process.argv);
 
-/**
- *
- * Fallback to help display
- *
- */
+  /**
+   *
+   * Fallback to help display
+   *
+   */
 
-if (!program.args.length) {
-  program.help();
-}
+  if (!program.args.length) {
+    program.help();
+  }
+}).error(helpers.err);

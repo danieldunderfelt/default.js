@@ -6,83 +6,56 @@ var _classProps = function (child, staticProps, instanceProps) {
 };
 
 var Skeleton = require("./Skeleton");
-var ignore = require("ignore");
-var recursive = require("recursive-readdir");
 var path = require("path");
+var chalk = require("chalk");
 var fs = require("fs-extra");
+var _ = require("lodash");
+var Promise = require("bluebird");
+Promise.longStackTraces();
 var closet = require("./Closet");
 var helpers = require("./helpers");
 var message = require("./messages");
+var ignore = require("./modules/ignore");
+var getFileList = require("./modules/ReadDir");
+var processPaths = require("./modules/ProcessFilepaths");
+var makeSkeletonFile = require("./modules/MakeSkeletonFile");
 
 var SkeletonFactory = (function () {
   var SkeletonFactory = function SkeletonFactory(callback) {
-    this.ignorePath = path.resolve(helpers.userHome(), ".closet");
-    this.ignore = ignore().addIgnoreFile(this.ignorePath);
     this.callback = callback;
+    this.skeleton = {};
   };
 
   _classProps(SkeletonFactory, null, {
     create: {
       writable: true,
       value: function (name, extend) {
-        var skeleton = this.createInstance(name);
-        var root = closet.makeSkeletonDir(name);
-        skeleton.originalRoot = process.cwd();
-        skeleton.root = root;
-        skeleton.extend = extend || false;
-        this.getSkeletonFiles(skeleton);
+        this.createInstance(name).then(closet.makeSkeletonDir).then(getFileList).then(ignore).then(processPaths.bind(this, this.skeleton.originalRoot)).then(this.setSkeletonFiles.bind(this)).then(this.callback()).error(helpers.err);
       }
     },
     createInstance: {
       writable: true,
       value: function (name) {
-        return new Skeleton(name);
-      }
-    },
-    getSkeletonFiles: {
-      writable: true,
-      value: function (skeleton) {
         var self = this;
-        recursive(process.cwd(), function (err, files) {
-          helpers.err(err);
-          self.processFiles(skeleton, files);
-        });
-      }
-    },
-    processFiles: {
-      writable: true,
-      value: function (skeleton, files) {
-        var ignoreProcessed = this.ignore.filter(files);
-        var pathProcessed = ignoreProcessed.map(function (path) {
-          return helpers.removeOrigPath(path, skeleton.originalRoot + "/");
-        });
 
-        this.setSkeletonFiles(skeleton, pathProcessed);
+        return new Promise(function (resolve) {
+          self.skeleton = new Skeleton(name);
+          self.skeleton.originalRoot = process.cwd();
+          self.skeleton.root = root;
+          resolve(name);
+        });
       }
     },
     setSkeletonFiles: {
       writable: true,
-      value: function (skeleton, files) {
-        skeleton.files = files;
+      value: function (files) {
+        this.skeleton.files = _.union(this.skeleton.files, files);
 
-        if (skeleton.root === process.cwd()) {
-          this.makeSkeletonFile(skeleton);
+        if (this.skeleton.root === process.cwd()) {
+          return makeSkeletonFile(this.skeleton);
         } else {
-          closet.put(skeleton, this.makeSkeletonFile.bind(this));
+          return closet.put(this.skeleton);
         }
-      }
-    },
-    makeSkeletonFile: {
-      writable: true,
-      value: function (skeleton) {
-        var self = this;
-
-        message.makeSkelFile();
-
-        fs.writeJson(skeleton.root + "/Skeletonfile", skeleton, function (err) {
-          helpers.err(err);
-          self.callback();
-        });
       }
     }
   });

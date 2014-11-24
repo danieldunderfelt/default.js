@@ -1,5 +1,6 @@
 "use strict";
 
+var util = require("util");
 var chalk = require("chalk");
 
 module.exports = {
@@ -8,8 +9,12 @@ module.exports = {
     process.exit(1);
   },
 
-  creating: function () {
-    print(chalk.cyan("Creating your new skeleton..."), "\u2620");
+  creating: function (name) {
+    print(chalk.cyan("Creating skeleton with name " + name + "..."), "\u2620");
+  },
+
+  extending: function (extName) {
+    print(chalk.cyan("Extending from skeleton " + extName + "..."), "\u271a");
   },
 
   done: function () {
@@ -20,7 +25,7 @@ module.exports = {
   error: function (err) {
     print(chalk.bold.red("Error!"), "\u2718");
     print(chalk.red("Here's the output if you're interested: "), "\u2718");
-    console.log(err);
+    util.debug(err.stack);
     process.exit(1);
   },
 

@@ -1,7 +1,9 @@
+var Promise = require('bluebird');
 var path = require('path');
-var fs = require('fs-extra');
+var fs = Promise.promisifyAll(require('fs-extra'));
 var helpers = require('./helpers');
 var message = require('./messages');
+var copy = require('./modules/FileTransfer');
 
 module.exports = {
 
@@ -11,29 +13,18 @@ module.exports = {
 
 	},
 
-	put: function(skeleton, callback) {
-		var self = this;
-		var count = skeleton.files.length - 1;
-
-		skeleton.files.forEach(function(file, i) {
-			message.fileTransfer(file);
-
-			file = '/' + file;
-			var from = skeleton.originalRoot + file;
-			var to = skeleton.root + file;
-
-			fs.copy(from, to, function(err) {
-				helpers.err(err);
-				if(i === count) callback(skeleton);
-			});
-		});
+	put: function(skeleton) {
+		return copy(skeleton.files, skeleton.originalRoot, skeleton.root);
 	},
 
 	make: function() {
-		if( ! fs.existsSync(this.path) ) {
-			var data = this.getIgnoreData();
-			fs.outputFileSync(this.path + '/.skeleton-ignore', data);
-		}
+		var self = this;
+		return fs.ensureDirAsync(this.path)
+		.then(self.getIgnoreData())
+		.then(function(data) {
+			return fs.outputFileAsync(self.path + '/.skeleton-ignore', data);
+		})
+		.catch(helpers.err);
 	},
 
 	makeSkeletonDir: function(name) {
@@ -42,8 +33,12 @@ module.exports = {
 		return skeletonDir;
 	},
 
-	getIgnoreData: function() {
-		return fs.readFileSync(path.resolve(__dirname, '../data/.skeleton-ignore'));
+	getIgnoreData: function(proceed) {
+		if(!proceed) {
+			return fs.readFileAsync(path.resolve(__dirname, '../../data/.skeleton-ignore'));
+		}
+
+		else return false;
 	}
 
 };

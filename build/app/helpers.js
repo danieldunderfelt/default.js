@@ -17,9 +17,5 @@ module.exports = {
 
   isSkeleton: function (dirName) {
     return fs.existsSync(path.resolve(this.userHome(), ".closet/" + dirName) + "/Skeletonfile");
-  },
-
-  removeOrigPath: function (str, substr) {
-    return str.replace(substr, "");
   }
 };

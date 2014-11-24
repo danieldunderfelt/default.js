@@ -14,7 +14,7 @@ gulp.task('test', function () {
 });
 
 gulp.task('watch', function() {
-	gulp.watch('src/**/*.js', ['es6', 'test']);
+	gulp.watch('src/**/*.js', ['es6']);
 	gulp.watch('spec/**/*.js', ['test']);
 });
 

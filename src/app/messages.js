@@ -1,3 +1,4 @@
+var util = require('util');
 var chalk = require('chalk');
 
 module.exports = {
@@ -7,8 +8,12 @@ module.exports = {
 		process.exit(1);
 	},
 
-	creating: function() {
-		print(chalk.cyan("Creating your new skeleton..."), "☠");
+	creating: function(name) {
+		print(chalk.cyan("Creating skeleton with name " + name +"..."), "☠");
+	},
+
+	extending: function(extName) {
+		print(chalk.cyan("Extending from skeleton " + extName + "..."), "✚");
 	},
 
 	done: function() {
@@ -19,7 +24,7 @@ module.exports = {
 	error: function(err) {
 		print(chalk.bold.red("Error!"), "✘");
 		print(chalk.red("Here's the output if you're interested: "), "✘");
-		console.log(err);
+		util.debug(err.stack);
 		process.exit(1);
 	},
 
